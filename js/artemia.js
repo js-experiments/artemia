@@ -35,7 +35,7 @@ var artemia = (function () {
         }
     };
 
-    /*
+    /*===========================================
         HTML5 Storage :
             type="session"
             type="local"
@@ -46,108 +46,11 @@ var artemia = (function () {
         UserData Storage :
             type="userdata"
 
-    */
+    ===========================================*/
+
     cyste.getStore = function(params){
         /*{type:'local',base:'myfirstbase'}*/
         return cyste['get_'+params.type.toUpperCase()+'_store'](params.base,params.type);
-    };
-
-    cyste._getStore = function(kindOfStore,baseName,storeType){
-        return {
-            storeType:storeType,
-            baseName:baseName,
-
-            isAvailable:function(){
-                try{
-                    kindOfStore.setItem("testKey","testValue");
-                    kindOfStore.removeItem("testKey");
-                }catch(err){
-                    return false; /*not available*/
-                }
-                return true;
-            },
-
-            get:function(key,callback){
-                var obj = JSON.parse(kindOfStore.getItem(this.baseName+'|'+key));
-                if(obj){obj.key=key;callback(obj);}else{callback(null);}
-            },
-
-            remove:function(keyOrObject,callback){
-                var key = this.baseName + '|' + (typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key);
-                /*TODO: have to verify if exists before delete*/
-                kindOfStore.removeItem(key);
-                callback(key);
-            },
-
-            save:function(obj,callback){
-                var id = this.baseName+'|'+(obj.key || cyste.guidGenerator());
-                delete obj.key;
-                try{
-                    kindOfStore.setItem(id,JSON.stringify(obj));
-
-                    //console.log(JSON.stringify(obj));
-
-                    obj.key = id.split('|')[1];
-                    callback(obj);
-                }catch(err){throw(err);}
-            },
-
-            all:function(callback){
-                var results = [],i,store=kindOfStore,l=store.length,id,key,baseName,obj;
-                for (i = 0 ; i < l; ++i){
-                    id=store.key(i);
-                    baseName = id.split('|')[0];
-                    key = id.split('|').slice(1).join("|");
-                    if(baseName==this.baseName){
-                        obj = JSON.parse(kindOfStore.getItem(id));
-                        obj.key = key;
-                        results.push(obj);
-                    }
-                }
-                callback(results);
-            },
-
-            drop:function(callback){
-                var m,that=this;
-                this.all(function(r){
-                    for(m in r){
-                        that.remove(r[m].key,function(){});
-                    }
-                });
-                callback();
-            },
-
-            query:function(map,callback){
-                var results = [],res,m;
-                this.all(function(r){
-                    for(m in r){
-                        res = map(r[m]);
-                        if(res){results.push(res);}
-                    }
-                });
-                if(callback){callback(results);}
-
-                return {
-                    sum:function(callback){
-                        res=cyste.sum(results);
-                        if(callback){callback(res);}
-                        return res;
-                    },
-                    min:function(callback){
-                        res=cyste.min(results);
-                        if(callback){callback(res);}
-                        return res;
-                    },
-                    max:function(callback){
-                        res=cyste.max(results);
-                        if(callback){callback(res);}
-                        return res;
-                    }
-                }
-
-            }
-
-        };
     };
 
     cyste.allDbs = function(){

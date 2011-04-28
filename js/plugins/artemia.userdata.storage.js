@@ -1,11 +1,9 @@
-/*
-
- */
 
 var artemia = (function (cyste) {
-    /*
+    
+    /*===========================================
         Navigator : IE
-    */
+    ===========================================*/
 
     function getUserDataStore(baseName,storeType){
 
@@ -144,7 +142,6 @@ var artemia = (function (cyste) {
         if(!store.isAvailable()){store=null;}
         return store;
     };
-
 
     return cyste;
 }(artemia));
