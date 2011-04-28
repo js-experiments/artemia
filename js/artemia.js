@@ -17,6 +17,7 @@ var artemia = (function () {
         get:function(){},
         remove:function(){},
         save:function(){},
+        all:function(){},
         drop:function(){},
         query:function(){}
     };
@@ -61,7 +62,7 @@ var artemia = (function () {
                     kindOfStore.setItem("testKey","testValue");
                     kindOfStore.removeItem("testKey");
                 }catch(err){
-                    return false;
+                    return false; /*not available*/
                 }
                 return true;
             },
@@ -83,9 +84,12 @@ var artemia = (function () {
                 delete obj.key;
                 try{
                     kindOfStore.setItem(id,JSON.stringify(obj));
+
+                    //console.log(JSON.stringify(obj));
+
                     obj.key = id.split('|')[1];
                     callback(obj);
-                }catch(err){throw(e);}
+                }catch(err){throw(err);}
             },
 
             all:function(callback){
@@ -165,12 +169,13 @@ var artemia = (function () {
         return total;
     };
 
+    /*John Resig tips : http://ejohn.org/blog/fast-javascript-maxmin/*/
     cyste.min = function(values){
-        /*TODO*/
+        return Math.min.apply( Math, values );
     };
 
     cyste.max = function(values){
-        /*TODO*/
+        return  Math.max.apply( Math, values );
     };
 
     return cyste;
