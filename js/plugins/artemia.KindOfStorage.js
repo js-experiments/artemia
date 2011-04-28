@@ -1,5 +1,5 @@
 /*
-
+    model of adaptor plugin
  */
 
 var artemia = (function (cyste) {
@@ -13,6 +13,7 @@ var artemia = (function (cyste) {
             get:function(){},
             remove:function(){},
             save:function(){},
+            all:function(){},
             drop:function(){},
             query:function(){}
         };
