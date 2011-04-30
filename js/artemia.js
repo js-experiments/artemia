@@ -6,34 +6,47 @@
  * --=>>>|:<
  */
 
+
+/*  04/30/11
+    jslint
+        white: true, onevar: true, undef: true, nomen: true,
+        regexp: true, plusplus: true, bitwise: false, newcap: true,
+        maxerr: 50, indent: 4
+*/
+
+
 var artemia = (function () {
 
     var cyste = {};
 
-    cyste.interface = {
-        storeType:'',
-        baseName:'',
-        isAvailable:function(){},
-        get:function(){},
-        remove:function(){},
-        save:function(){},
-        all:function(){},
-        drop:function(){},
-        query:function(){}
+    cyste.Interface = {
+        storeType : '',
+        baseName : '',
+        isAvailable : function () {},
+        get : function () {},
+        remove : function () {},
+        save : function () {},
+        all : function () {},
+        drop : function () {},
+        query : function () {}
     };
 
-    cyste.interfaceIsImplemented = function(store){
+    cyste.interfaceIsImplemented = function (store) {
         var m;
-        for(m in cyste.interface){
-            if(store[m]){
-                if(!(typeof cyste.interface[m] == typeof store[m])){
-                    throw("artemia : "+store.storeType+" Storage : '"+m+"' ("+typeof store[m]+")"+" : bad type");
+        for (m in cyste.Interface) {
+            if (cyste.Interface.hasOwnProperty(m)) {
+                if (store[m]) {
+                    if (typeof cyste.Interface[m] !== typeof store[m]) {
+                        throw ("artemia : " + store.storeType + " Storage : '" + m + "' (" + typeof store[m] + ")" + " : bad type");
+                    }
+                } else {
+                    throw ("artemia : " + store.storeType + " Storage : '" + m + "' method is missing");
                 }
-            }else{
-                throw("artemia : "+store.storeType+" Storage : '"+m+"' method is missing")
             }
         }
     };
+
+
 
     /*===========================================
         HTML5 Storage :
@@ -48,37 +61,43 @@ var artemia = (function () {
 
     ===========================================*/
 
-    cyste.getStore = function(params){
+    cyste.getStore = function (params) {
         /*{type:'local',base:'myfirstbase'}*/
-        return cyste['get_'+params.type.toUpperCase()+'_store'](params.base,params.type);
+        return cyste['get_' + params.type.toUpperCase() + '_store'](params.base, params.type);
     };
 
-    cyste.allDbs = function(){
+    cyste.allDbs = function () {
         /*TODO*/
     };
 
-    cyste.guidGenerator = function() {
-        var S4 = function() {
-           return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    cyste.guidGenerator = function () {
+        var S4 = function () {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
         };
-        return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+        return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
     };
 
-    cyste.sum = function(values){
-        var m,total=0;
-        for(m in values){
-            total+=values[m];
+    cyste.sum = function (values) {
+        var m, total = 0;
+        for (m in values) {
+            if (values.hasOwnProperty(m)) {
+                total += values[m];
+            }
         }
         return total;
     };
 
-    /*John Resig tips : http://ejohn.org/blog/fast-javascript-maxmin/*/
-    cyste.min = function(values){
-        return Math.min.apply( Math, values );
+    /*
+        John Resig tips :
+        http://ejohn.org/blog/fast-javascript-maxmin/
+    */
+
+    cyste.min = function (values) {
+        return Math.min.apply(Math, values);
     };
 
-    cyste.max = function(values){
-        return  Math.max.apply( Math, values );
+    cyste.max = function (values) {
+        return Math.max.apply(Math, values);
     };
 
     return cyste;
