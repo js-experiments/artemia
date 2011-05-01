@@ -59,6 +59,9 @@ var artemia = (function () {
         UserData Storage :
             type="userdata"
 
+        SqLite Storage :
+            type="sqlite"
+
     ===========================================*/
 
     cyste.getStore = function (params) {
