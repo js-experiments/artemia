@@ -87,6 +87,8 @@
     };
 
     ls.query(mapFunction,function(r){
+        console.log(r);
+        console.log(typeof r);
         for(var m in r){
             document.write("   - "+r[m].key+" "+r[m].title+" "+r[m].text+"<BR>");
         }
