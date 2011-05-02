@@ -41,72 +41,60 @@ var artemia = (function (cyste) {
 
             isAvailable : function () {
                 var s_create;
-                /* var s_create, s_index; */
-
-                function nothingToDoHandler() { /*nothing to do*/ }
-
-                function errorHandlerWhenCreateTable(error) {
-                    //throw (error);
-                    //throw ('CREATE TABLE WARNING.  Error was ' + error.message + ' (Code ' + error.code + ')');
-                }
-
-                function errorHandlerWhenCreateIndex(error) {
-                    //throw (error);
-                    //throw ('CREATE INDEX WARNING.  Error was ' + error.message + ' (Code ' + error.code + ')');
-                }
-
+                //var s_create, s_index;
 
                 try {
                     // instantiate the store only once time
                     if(!artemia[storeName]) artemia[storeName] = window.openDatabase('Artemia', '1.0', 'ARTEMIADB', 65536);
                     this.dataBase = artemia[storeName];
-
-
                     s_create = "CREATE TABLE IF NOT EXISTS  " + this.storeName + "(UniqueId TEXT UNIQUE PRIMARY KEY,SerializedObject TEXT)";
-                    //s_create = "CREATE TABLE IF NOT EXISTS  " + this.baseName + "(UniqueId TEXT ,SerializedObject TEXT)";
                     //s_index  = "CREATE INDEX IF NOT EXISTS idxObjects ON "+this.storeName+" (UniqueId,SerializedObject)";
-                    execQuery(this.dataBase, s_create, nothingToDoHandler, errorHandlerWhenCreateTable);
-                    //execQuery(this.dataBase, s_index, nothingToDoHandler, errorHandlerWhenCreateIndex);
-                    /*TODO: test with index for query*/
-                    
+                    //execQuery(this.dataBase, s_create, function(){}, function(){});
+                    //execQuery(this.dataBase, s_index, function(){}, function(){});
+                    this.dataBase.transaction(function(tx) {
+                        tx.executeSql(
+                                s_create,
+                                [], null, null);
+                    });
                 } catch (err) {
                     if (err === 2) {
                         // Version number mismatch.
                         throw ("Invalid database version");
 
                     } else {
-                        return false; /*not available*/
-                        //throw ("Unknown error " + err);
+                        /*return false;*/ /*not available*/
+                        throw ("Unknown error " + err);
                     }
-
                 }
                 return true;
             },
 
             save : function (obj, callback) {
-                var update, insert, db = this.dataBase, storeName = this.storeName ;
+                //var update, insert, db = this.dataBase, storeName = this.storeName, that = this ;
+                var update, insert, that = this ;
 
                 update = function (obj, callback) {
-                    var qString = "UPDATE " + storeName + " SET SerializedObject = '" + JSON.stringify(obj) + "' WHERE UniqueId = '" + obj.key + "';";
-	                //execQuery(db, qString, callback, errorHandler);
-                    db.transaction(function(tx) {
-                        var resultsHandler = function () {
-                            callback(obj);
-                        };
-                        tx.executeSql(qString, [], resultsHandler, function(){});
+                    that.dataBase.transaction(function(tx) {
+                        tx.executeSql(
+                                "UPDATE " + that.storeName + " SET SerializedObject = ? WHERE UniqueId = ?;",
+                                [JSON.stringify(obj), obj.key], callback(obj), null);
                     });
                 };
 
                 insert = function (obj, callback) {
-                    var qString;
-                    obj.key = obj.key || cyste.guidGenerator();
-                    qString = "INSERT INTO " + storeName + " (UniqueId, SerializedObject) VALUES ('" + obj.key + "','" + JSON.stringify(obj) + "');";
-                    //execQuery(db, qString, callback, errorHandler);
-                    db.transaction(function(tx) {
-                        var resultsHandler = function () {
-                            callback(obj);
-                        };
-                        tx.executeSql(qString, [], resultsHandler, function(){});
+                    //obj.key = obj.key || cyste.guidGenerator();
+                    //if (!obj.key) { obj.key = cyste.guidGenerator();}
+                    that.dataBase.transaction(function(tx) {
+                        //obj.key = obj.key || cyste.guidGenerator();
+                        //if (!obj.key) { obj.key = cyste.guidGenerator();}
+                        /*
+                        tx.executeSql(
+                                "INSERT INTO " + that.storeName + " (UniqueId, SerializedObject) VALUES (?, ?);",
+                                [obj.key, JSON.stringify(obj)], callback(obj), null);
+                        */
+                        tx.executeSql(
+                                "INSERT INTO " + that.storeName + " (UniqueId, SerializedObject) VALUES (?, ?);",
+                                [obj.key || cyste.guidGenerator(), JSON.stringify(obj)], callback(obj), null);
                     });
                 };
 
@@ -129,7 +117,7 @@ var artemia = (function (cyste) {
             },
 
             get : function (key, callback) {
-                var qString = "SELECT SerializedObject FROM " + this.storeName + " WHERE UniqueId='" + key + "';", db = this.dataBase;
+                var qString = "SELECT SerializedObject FROM " + this.storeName + " WHERE UniqueId= ?;", db = this.dataBase;
 
                 db.transaction(function(tx) {
                     var resultsHandler = function (tx, recs) {
@@ -139,14 +127,14 @@ var artemia = (function (cyste) {
                         } else { obj = null; }
                         callback(obj);
                     };
-                    tx.executeSql(qString, [], resultsHandler, function(){});
+                    tx.executeSql(qString, [key], resultsHandler, function(){});
                 });                                                
             },
 
             remove : function (keyOrObject, callback) {
                 var
                         key = typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key,
-                        qString = "DELETE FROM " + this.storeName + " WHERE UniqueId='" + key + "';",
+                        qString = "DELETE FROM " + this.storeName + " WHERE UniqueId= ?;",
                         db = this.dataBase;
 
                 /*TODO: have to verify if exists before delete*/
@@ -155,17 +143,16 @@ var artemia = (function (cyste) {
                     var resultsHandler = function (tx) {
                         callback(key);
                     };
-                    tx.executeSql(qString, [], resultsHandler, function(){});
+                    tx.executeSql(qString, [key], resultsHandler, function(){});
                 });
             },
 
             all : function (callback) {
-                var qString = "SELECT * FROM " + this.storeName + ";", db = this.dataBase;
-
-                db.transaction(function(tx) {
+                var that = this ;
+                that.dataBase.transaction(function(tx) {
+                    var qString = "SELECT * FROM " + that.storeName + ";";
                     var resultsHandler = function (tx, recs) {
                         var results = [], obj = {}, i, row;
-
                         //for (i = 0; i < recs.rows.length; i += 1) {
                         for(i = recs.rows.length; i--;) {
                             row = recs.rows.item(i);
@@ -185,8 +172,6 @@ var artemia = (function (cyste) {
                 var qString, db = this.dataBase;
 
                 qString = "DELETE FROM " + this.storeName + ";";
-                //execQuery(db, qString, afterDrop, errorHandler);
-                //console.log(qString);
                 db.transaction(function(tx) {
                     var resultsHandler = function () {
                         callback();
