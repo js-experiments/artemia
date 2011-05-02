@@ -46,12 +46,12 @@ var artemia = (function (cyste) {
                 function nothingToDoHandler() { /*nothing to do*/ }
 
                 function errorHandlerWhenCreateTable(error) {
-                    throw (error);
+                    //throw (error);
                     //throw ('CREATE TABLE WARNING.  Error was ' + error.message + ' (Code ' + error.code + ')');
                 }
 
                 function errorHandlerWhenCreateIndex(error) {
-                    throw (error);
+                    //throw (error);
                     //throw ('CREATE INDEX WARNING.  Error was ' + error.message + ' (Code ' + error.code + ')');
                 }
 
@@ -64,9 +64,9 @@ var artemia = (function (cyste) {
 
                     s_create = "CREATE TABLE IF NOT EXISTS  " + this.storeName + "(UniqueId TEXT UNIQUE PRIMARY KEY,SerializedObject TEXT)";
                     //s_create = "CREATE TABLE IF NOT EXISTS  " + this.baseName + "(UniqueId TEXT ,SerializedObject TEXT)";
-                    s_index  = "CREATE INDEX IF NOT EXISTS idxObjects ON "+this.storeName+" (UniqueId,SerializedObject)";
+                    //s_index  = "CREATE INDEX IF NOT EXISTS idxObjects ON "+this.storeName+" (UniqueId,SerializedObject)";
                     execQuery(this.dataBase, s_create, nothingToDoHandler, errorHandlerWhenCreateTable);
-                    execQuery(this.dataBase, s_index, nothingToDoHandler, errorHandlerWhenCreateIndex);
+                    //execQuery(this.dataBase, s_index, nothingToDoHandler, errorHandlerWhenCreateIndex);
                     /*TODO: test with index for query*/
                     
                 } catch (err) {
@@ -93,11 +93,7 @@ var artemia = (function (cyste) {
                         var resultsHandler = function () {
                             callback(obj);
                         };
-                        var errorHandler = function (error) {
-                            throw (error);
-                            //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                        };
-                        tx.executeSql(qString, [], resultsHandler, errorHandler);
+                        tx.executeSql(qString, [], resultsHandler, function(){});
                     });
                 };
 
@@ -110,12 +106,7 @@ var artemia = (function (cyste) {
                         var resultsHandler = function () {
                             callback(obj);
                         };
-                        var errorHandler = function (error) {
-                            //throw (error);
-                            //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                            callback(error);
-                        };
-                        tx.executeSql(qString, [], resultsHandler, errorHandler);
+                        tx.executeSql(qString, [], resultsHandler, function(){});
                     });
                 };
 
@@ -148,11 +139,7 @@ var artemia = (function (cyste) {
                         } else { obj = null; }
                         callback(obj);
                     };
-                    var errorHandler = function (error) {
-                        throw (error);
-                        //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                    };
-                    tx.executeSql(qString, [], resultsHandler, errorHandler);
+                    tx.executeSql(qString, [], resultsHandler, function(){});
                 });                                                
             },
 
@@ -168,11 +155,7 @@ var artemia = (function (cyste) {
                     var resultsHandler = function (tx) {
                         callback(key);
                     };
-                    var errorHandler = function (error) {
-                        throw (error);
-                        //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                    };
-                    tx.executeSql(qString, [], resultsHandler, errorHandler);
+                    tx.executeSql(qString, [], resultsHandler, function(){});
                 });
             },
 
@@ -193,11 +176,7 @@ var artemia = (function (cyste) {
                         //if (obj) {obj.key = key; callback(obj); } else { callback(null); }
                         callback(results);
                     };
-                    var errorHandler = function (error) {
-                        throw (error);
-                        //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                    };
-                    tx.executeSql(qString, [], resultsHandler, errorHandler);
+                    tx.executeSql(qString, [], resultsHandler, function(){});
                 });
             },
 
@@ -212,13 +191,8 @@ var artemia = (function (cyste) {
                     var resultsHandler = function () {
                         callback();
                     };
-                    var errorHandler = function (error) {
-                        //console.log(qString);
-                        //console.log(error);
-                        throw (error);
-                        //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                    };
-                    tx.executeSql(qString, [], resultsHandler, errorHandler);
+
+                    tx.executeSql(qString, [], resultsHandler, function(){});
                 });
                 
             },
