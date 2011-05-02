@@ -21,7 +21,7 @@ var artemia = (function () {
 
     cyste.Interface = {
         storeType : '',
-        baseName : '',
+        storeName : '',
         isAvailable : function () {},
         get : function () {},
         remove : function () {},

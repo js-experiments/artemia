@@ -12,7 +12,7 @@ var artemia = (function (cyste) {
         Navigator : IE
     ===========================================*/
 
-    function getUserDataStore(baseName, storeType) {
+    function getUserDataStore(storeName, storeType) {
 
         /*
             from jsMag august 2010 article :
@@ -21,7 +21,7 @@ var artemia = (function (cyste) {
 
         */
         function getStorageEl() {
-            var elName = baseName, el;
+            var elName = storeName, el;
             /* We have to have a Dom element to operate on.
             If one already exists, we’ll use it. Otherwise,
             create it and attach the necessary behavior.*/
@@ -39,10 +39,10 @@ var artemia = (function (cyste) {
 
         return {
             storeType : storeType,
-            baseName : baseName,
+            storeName : storeName,
             isAvailable : function () {
                 try {
-                    getStorageEl().load(this.baseName);
+                    getStorageEl().load(this.storeName);
                     return true;
                 } catch (err) {
                     //alert(err);
@@ -53,29 +53,29 @@ var artemia = (function (cyste) {
             get : function (key, callback) {
                 /* '|, :, ' are forbidden with IE i use '__' instead */
                 var obj, storageEl = getStorageEl();
-                storageEl.load(this.baseName);
-                obj = JSON.parse(storageEl.getAttribute(this.baseName + '__' + key));
+                storageEl.load(this.storeName);
+                obj = JSON.parse(storageEl.getAttribute(this.storeName + '__' + key));
                 if (obj) {obj.key = key; callback(obj); } else { callback(null); }
             },
 
             remove : function (keyOrObject, callback) {
                 /* '|, :, ' are forbidden with IE i use '__' instead */
-                var key = this.baseName + '__' + (typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key),
+                var key = this.storeName + '__' + (typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key),
                     storageEl = getStorageEl();
                 /*TODO: have to verify if exists before delete*/
                 storageEl.removeAttribute(key);
-                storageEl.save(this.baseName);
+                storageEl.save(this.storeName);
                 callback(key);
             },
 
             save : function (obj, callback) {
                 /* '|, :, ' are forbidden with IE i use '__' instead */
-                var id = this.baseName + '__' + (obj.key || cyste.guidGenerator()), storageEl;
+                var id = this.storeName + '__' + (obj.key || cyste.guidGenerator()), storageEl;
                 delete obj.key;
                 try {
                     storageEl = getStorageEl();
                     storageEl.setAttribute(id, JSON.stringify(obj));
-                    storageEl.save(this.baseName);
+                    storageEl.save(this.storeName);
 
                     obj.key = id.split('__')[1];
                     callback(obj);

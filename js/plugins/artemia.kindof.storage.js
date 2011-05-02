@@ -8,7 +8,7 @@ var artemia = (function (cyste) {
 
         return {
             storeType:storeType,
-            baseName:baseName,
+            storeName:baseName,
             isAvailable:function(){},
             get:function(){},
             remove:function(){},

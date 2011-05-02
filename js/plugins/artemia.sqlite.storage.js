@@ -33,10 +33,10 @@ var artemia = (function (cyste) {
         );
     }
 
-    function getSqLiteStore(baseName, storeType) {
+    function getSqLiteStore(storeName, storeType) {
         return {
             storeType : storeType,
-            baseName : baseName,
+            storeName : storeName,
             dataBase : null,
 
             isAvailable : function () {
@@ -57,10 +57,14 @@ var artemia = (function (cyste) {
 
 
                 try {
-                    this.dataBase = window.openDatabase(this.baseName, '1.0', 'ARTEMIADB', 65536);
-                    //s_create = "CREATE TABLE IF NOT EXISTS  OBJECTS(UniqueId TEXT UNIQUE PRIMARY KEY,SerializedObject TEXT)";
-                    s_create = "CREATE TABLE IF NOT EXISTS  OBJECTS(UniqueId TEXT ,SerializedObject TEXT)";
-                    s_index  = "CREATE INDEX IF NOT EXISTS idxObjects ON OBJECTS (UniqueId,SerializedObject)";
+                    // instantiate the store only once time
+                    if(!artemia[storeName]) artemia[storeName] = window.openDatabase('Artemia', '1.0', 'ARTEMIADB', 65536);
+                    this.dataBase = artemia[storeName];
+
+
+                    s_create = "CREATE TABLE IF NOT EXISTS  " + this.storeName + "(UniqueId TEXT UNIQUE PRIMARY KEY,SerializedObject TEXT)";
+                    //s_create = "CREATE TABLE IF NOT EXISTS  " + this.baseName + "(UniqueId TEXT ,SerializedObject TEXT)";
+                    s_index  = "CREATE INDEX IF NOT EXISTS idxObjects ON "+this.storeName+" (UniqueId,SerializedObject)";
                     execQuery(this.dataBase, s_create, nothingToDoHandler, errorHandlerWhenCreateTable);
                     execQuery(this.dataBase, s_index, nothingToDoHandler, errorHandlerWhenCreateIndex);
                     /*TODO: test with index for query*/
@@ -80,14 +84,14 @@ var artemia = (function (cyste) {
             },
 
             save : function (obj, callback) {
-                var update, insert, db = this.dataBase;
+                var update, insert, db = this.dataBase, storeName = this.storeName ;
 
                 update = function (obj, callback) {
-                    var qString = "UPDATE OBJECTS SET SerializedObject='" + JSON.stringify(obj) + "' WHERE UniqueId='" + obj.key + "';";
+                    var qString = "UPDATE " + storeName + " SET SerializedObject = '" + JSON.stringify(obj) + "' WHERE UniqueId = '" + obj.key + "';";
 	                //execQuery(db, qString, callback, errorHandler);
                     db.transaction(function(tx) {
-                        var resultsHandler = function (tx, recs) {
-                            callback(recs);
+                        var resultsHandler = function () {
+                            callback(obj);
                         };
                         var errorHandler = function (error) {
                             throw (error);
@@ -100,15 +104,16 @@ var artemia = (function (cyste) {
                 insert = function (obj, callback) {
                     var qString;
                     obj.key = obj.key || cyste.guidGenerator();
-                    qString = "INSERT INTO OBJECTS (UniqueId, SerializedObject) VALUES ('" + obj.key + "','" + JSON.stringify(obj) + "');";
+                    qString = "INSERT INTO " + storeName + " (UniqueId, SerializedObject) VALUES ('" + obj.key + "','" + JSON.stringify(obj) + "');";
                     //execQuery(db, qString, callback, errorHandler);
                     db.transaction(function(tx) {
-                        var resultsHandler = function (tx, recs) {
-                            callback(recs);
+                        var resultsHandler = function () {
+                            callback(obj);
                         };
                         var errorHandler = function (error) {
-                            throw (error);
+                            //throw (error);
                             //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
+                            callback(error);
                         };
                         tx.executeSql(qString, [], resultsHandler, errorHandler);
                     });
@@ -133,7 +138,7 @@ var artemia = (function (cyste) {
             },
 
             get : function (key, callback) {
-                var qString = "SELECT SerializedObject FROM OBJECTS WHERE UniqueId='" + key + "';", db = this.dataBase;
+                var qString = "SELECT SerializedObject FROM " + this.storeName + " WHERE UniqueId='" + key + "';", db = this.dataBase;
 
                 db.transaction(function(tx) {
                     var resultsHandler = function (tx, recs) {
@@ -154,7 +159,7 @@ var artemia = (function (cyste) {
             remove : function (keyOrObject, callback) {
                 var
                         key = typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key,
-                        qString = "DELETE FROM OBJECTS WHERE UniqueId='" + key + "';",
+                        qString = "DELETE FROM " + this.storeName + " WHERE UniqueId='" + key + "';",
                         db = this.dataBase;
 
                 /*TODO: have to verify if exists before delete*/
@@ -172,7 +177,7 @@ var artemia = (function (cyste) {
             },
 
             all : function (callback) {
-                var qString = "SELECT * FROM OBJECTS;", db = this.dataBase;
+                var qString = "SELECT * FROM " + this.storeName + ";", db = this.dataBase;
 
                 db.transaction(function(tx) {
                     var resultsHandler = function (tx, recs) {
@@ -196,24 +201,32 @@ var artemia = (function (cyste) {
                 });
             },
 
-            drop : function (callback) {
+            nuke : function (callback) {
 
-                var qstring, db = this.dataBase;
+                var qString, db = this.dataBase;
 
-                function afterDrop() {
-                    callback();
-                }
-
-                function errorHandler(error) {
-                    throw (error);
-                    //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                }
-                qstring = "DROP TABLE OBJECTS;";
-                execQuery(db, qstring, afterDrop, errorHandler);
+                qString = "DELETE FROM " + this.storeName + ";";
+                //execQuery(db, qString, afterDrop, errorHandler);
+                //console.log(qString);
+                db.transaction(function(tx) {
+                    var resultsHandler = function () {
+                        callback();
+                    };
+                    var errorHandler = function (error) {
+                        //console.log(qString);
+                        //console.log(error);
+                        throw (error);
+                        //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
+                    };
+                    tx.executeSql(qString, [], resultsHandler, errorHandler);
+                });
                 
             },
 
-            nuke : this.drop,
+            drop : function (callback) {
+                /* TODO: DROP ... */
+            },
+
 
             query : function (map, callback) {
                 var results = [], res;

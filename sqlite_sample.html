@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="js/artemia.js"></script>
+    <script type="text/javascript" src="js/plugins/artemia.sqlite.storage.js"></script>
+</head>
+<body>
+
+</body>
+
+<script>
+    var ls = artemia.getStore({type:'sqlite',base:'sqlitebase2'});
+
+    var doc1 = {
+        /*key:"key000",*/
+        title:"Hello",
+        text:"this the doc one",
+        price:20
+    }
+
+    var doc2 = {
+        key:"key001",
+        title:"Salut",
+        text:"this the doc two",
+        price:5
+    }
+
+
+    var doc3 = {
+        key:"key002",
+        title:"Hello",
+        text:"this the doc three",
+        price:34
+    }
+
+    var doc4 = {
+        key:"key003",
+        title:"Salut",
+        text:"this the doc four",
+        price:180
+    }
+
+     var doc5 = {
+        key:"key004",
+        title:"Hello",
+        text:"this the doc five",
+        price:45
+    }
+
+    ls.save(doc1,function(r){
+        document.write("doc1 is saved<BR>");
+
+        ls.save(doc2,function(r){
+            document.write("doc2 is saved<BR>");
+
+            ls.save(doc3,function(r){
+                document.write("doc3 is saved<BR>");
+
+                ls.save(doc4,function(r){
+                    document.write("doc4 is saved<BR>");
+
+                    ls.save(doc5,function(r){
+                        document.write("doc5 is saved<BR>");
+
+
+                        document.write("<HR>");
+                        document.write("search with key = 'key001' : <HR>");
+
+                        ls.get('key002',function(r){
+                            document.write(r.key+" " + r.title+" "+r.text+" has been found");
+                            document.write("<HR>");
+                        });
+
+
+
+                        ls.get('key001',function(r){
+                            document.write(r.key+" " + r.title+" "+r.text+" has been found");
+                            document.write("<HR>");
+
+                            document.write("List all documents :<BR><HR>");
+
+                            ls.all(function(r){
+                                for(var m in r){
+                                    document.write("   - "+r[m].key+" "+r[m].title+" "+r[m].text+"<BR>");
+
+                                    //ls.remove(r[m].key,function(r){console.log(r);})
+                                }
+                                document.write("<HR>");
+
+                                //document.write("Query documents :<BR>");
+
+
+
+
+                            });
+
+                        });
+                    });
+
+                });
+            });
+
+        });
+
+    });
+
+
+    var mapFunction = function(doc){
+      if (doc.title=="Salut")
+        return doc
+    };
+
+    ls.query(mapFunction,function(r){
+        console.log(r);
+        console.log(typeof r);
+        for(var m in r){
+            document.write("   - "+r[m].key+" "+r[m].title+" "+r[m].text+"<BR>");
+        }
+    });
+
+/*
+
+
+    document.write("<HR>");
+
+    document.write("I want the total of prices of all documents :<BR>");
+
+    var sumFunction = function(doc){
+        return doc.price;
+    }
+
+    ls.query(sumFunction,function(r){}).sum(function(r){document.write("SUM = "+r+"<BR>");});
+
+    document.write("SUM AGAIN = "+ls.query(sumFunction).sum());
+
+    document.write("<HR>");
+    document.write("MIN = "+ls.query(sumFunction).min());
+    document.write("<HR>");
+    document.write("MIN = "+ls.query(sumFunction).max());
+*/
+</script>
+</html>

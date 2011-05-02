@@ -15,10 +15,10 @@
 
 var artemia = (function (cyste) {
 
-    function getHtml5OrGlobalStore(kindOfStore, baseName, storeType) {
+    function getHtml5OrGlobalStore(kindOfStore, StoreName, storeType) {
         return {
             storeType : storeType,
-            baseName : baseName,
+            storeName : StoreName,
 
             isAvailable : function () {
                 try {
@@ -31,19 +31,19 @@ var artemia = (function (cyste) {
             },
 
             get : function (key, callback) {
-                var obj = JSON.parse(kindOfStore.getItem(this.baseName + '|' + key));
+                var obj = JSON.parse(kindOfStore.getItem(this.storeName + '|' + key));
                 if (obj) {obj.key = key; callback(obj); } else { callback(null); }
             },
 
             remove : function (keyOrObject, callback) {
-                var key = this.baseName + '|' + (typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key);
+                var key = this.storeName + '|' + (typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key);
                 /*TODO: have to verify if exists before delete*/
                 kindOfStore.removeItem(key);
                 callback(key);
             },
 
             save : function (obj, callback) {
-                var id = this.baseName + '|' + (obj.key || cyste.guidGenerator());
+                var id = this.storeName + '|' + (obj.key || cyste.guidGenerator());
                 delete obj.key;
                 //try {
                     kindOfStore.setItem(id, JSON.stringify(obj));
@@ -59,7 +59,7 @@ var artemia = (function (cyste) {
                     id = store.key(i);
                     baseName = id.split('|')[0];
                     key = id.split('|').slice(1).join("|");
-                    if (baseName === this.baseName) {
+                    if (baseName === this.storeName) {
                         obj = JSON.parse(kindOfStore.getItem(id));
                         obj.key = key;
                         results.push(obj);
