@@ -35,7 +35,19 @@
                 document.write("   - "+r[m].key+" "+r[m].title+" "+r[m].text+"<BR>");
                 console.log("   - "+r[m].key+" "+r[m].title+" "+r[m].text);
             }
+
+            document.write("<HR>");
+            ls.get("key001", function(r){
+                document.write("   * "+r.key+" "+r.title+" "+r.text+"<BR>");
+                ls.get("key002", function(r){
+                    document.write("   * "+r.key+" "+r.title+" "+r.text+"<BR>");
+                });
+            });
+
         });
+
+
+
 
 
 
