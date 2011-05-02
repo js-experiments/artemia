@@ -40,24 +40,29 @@ var artemia = (function (cyste) {
             dataBase : null,
 
             isAvailable : function () {
-                var s_create, s_index;
+                var s_create;
+                /* var s_create, s_index; */
 
                 function nothingToDoHandler() { /*nothing to do*/ }
 
                 function errorHandlerWhenCreateTable(error) {
-                    throw ('CREATE TABLE WARNING.  Error was ' + error.message + ' (Code ' + error.code + ')');
+                    throw (error);
+                    //throw ('CREATE TABLE WARNING.  Error was ' + error.message + ' (Code ' + error.code + ')');
                 }
 
                 function errorHandlerWhenCreateIndex(error) {
-                    throw ('CREATE INDEX WARNING.  Error was ' + error.message + ' (Code ' + error.code + ')');
+                    throw (error);
+                    //throw ('CREATE INDEX WARNING.  Error was ' + error.message + ' (Code ' + error.code + ')');
                 }
+
 
                 try {
                     this.dataBase = window.openDatabase(this.baseName, '1.0', 'ARTEMIADB', 65536);
-                    s_create = "CREATE TABLE IF NOT EXISTS  OBJECTS(UniqueId TEXT UNIQUE PRIMARY KEY,SerializedObject TEXT)";
-                    //s_index  = "CREATE INDEX IF NOT EXISTS idxObjects ON OBJECTS (UniqueId,SerializedObject)";
+                    //s_create = "CREATE TABLE IF NOT EXISTS  OBJECTS(UniqueId TEXT UNIQUE PRIMARY KEY,SerializedObject TEXT)";
+                    s_create = "CREATE TABLE IF NOT EXISTS  OBJECTS(UniqueId TEXT ,SerializedObject TEXT)";
+                    s_index  = "CREATE INDEX IF NOT EXISTS idxObjects ON OBJECTS (UniqueId,SerializedObject)";
                     execQuery(this.dataBase, s_create, nothingToDoHandler, errorHandlerWhenCreateTable);
-                    //execQuery(this.dataBase, s_index, nothingToDoHandler, errorHandlerWhenCreateIndex);
+                    execQuery(this.dataBase, s_index, nothingToDoHandler, errorHandlerWhenCreateIndex);
                     /*TODO: test with index for query*/
                     
                 } catch (err) {
@@ -77,36 +82,36 @@ var artemia = (function (cyste) {
             save : function (obj, callback) {
                 var update, insert, db = this.dataBase;
 
-                //console.log(this.dataBase);
-
                 update = function (obj, callback) {
-                    var qstring;
-                    function errorHandler(error) {
-                        throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                    }
-                    qstring = "UPDATE OBJECTS SET SerializedObject='" + JSON.stringify(obj) + "' WHERE UniqueId='" + obj.key + "';";
-
-                    //console.log(that.database);
-
-	                execQuery(db, qstring, callback, errorHandler);
+                    var qString = "UPDATE OBJECTS SET SerializedObject='" + JSON.stringify(obj) + "' WHERE UniqueId='" + obj.key + "';";
+	                //execQuery(db, qString, callback, errorHandler);
+                    db.transaction(function(tx) {
+                        var resultsHandler = function (tx, recs) {
+                            callback(recs);
+                        };
+                        var errorHandler = function (error) {
+                            throw (error);
+                            //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
+                        };
+                        tx.executeSql(qString, [], resultsHandler, errorHandler);
+                    });
                 };
 
                 insert = function (obj, callback) {
-                    var qstring;
-                    //var id = obj.key || cyste.guidGenerator()
-                    //obj.key = id;
+                    var qString;
                     obj.key = obj.key || cyste.guidGenerator();
-                    //var id = (obj.key == undefined) ? that.uuid() : obj.key;
-                    //delete obj.key;
-                    function errorHandler(error) {
-                        throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                    }
-
-                    qstring = "INSERT INTO OBJECTS (UniqueId, SerializedObject) VALUES ('" + obj.key + "','" + JSON.stringify(obj) + "');";
-
-                    //console.log(that.database);
-
-                    execQuery(db, qstring, callback, errorHandler);
+                    qString = "INSERT INTO OBJECTS (UniqueId, SerializedObject) VALUES ('" + obj.key + "','" + JSON.stringify(obj) + "');";
+                    //execQuery(db, qString, callback, errorHandler);
+                    db.transaction(function(tx) {
+                        var resultsHandler = function (tx, recs) {
+                            callback(recs);
+                        };
+                        var errorHandler = function (error) {
+                            throw (error);
+                            //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
+                        };
+                        tx.executeSql(qString, [], resultsHandler, errorHandler);
+                    });
                 };
 
                 if (obj.key === undefined) {
@@ -123,83 +128,72 @@ var artemia = (function (cyste) {
                             /* --- update --- */
                             update(obj, callback);
                         }
-
                     });
-
                 }
-
             },
 
             get : function (key, callback) {
+                var qString = "SELECT SerializedObject FROM OBJECTS WHERE UniqueId='" + key + "';", db = this.dataBase;
 
-                function errorHandler(error) {
-                    throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                }
-
-                this.dataBase.transaction(
-                    function (transaction) {
-                        transaction.executeSql(
-                            "SELECT SerializedObject FROM OBJECTS WHERE UniqueId='" + key + "';",
-                            [],
-                            function (transaction, dataSet) {
-                                var obj = {};
-                                if (dataSet.rows.length > 0) {
-                                    obj = JSON.parse(dataSet.rows.item(0).SerializedObject);
-                                } else { obj = null; }
-                                callback(obj);
-                            },
-                            errorHandler
-                        );
-                    }
-                );
+                db.transaction(function(tx) {
+                    var resultsHandler = function (tx, recs) {
+                        var obj = {};
+                        if (recs.rows.length > 0) {
+                            obj = JSON.parse(recs.rows.item(0).SerializedObject);
+                        } else { obj = null; }
+                        callback(obj);
+                    };
+                    var errorHandler = function (error) {
+                        throw (error);
+                        //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
+                    };
+                    tx.executeSql(qString, [], resultsHandler, errorHandler);
+                });                                                
             },
 
             remove : function (keyOrObject, callback) {
-                var key = typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key, qstring, db = this.dataBase;
+                var
+                        key = typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key,
+                        qString = "DELETE FROM OBJECTS WHERE UniqueId='" + key + "';",
+                        db = this.dataBase;
+
                 /*TODO: have to verify if exists before delete*/
-
-                function afterDelete() {
-                    callback(key);
-                }
-
-                function errorHandler(error) {
-                    throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                }
-                qstring = "DELETE FROM OBJECTS WHERE UniqueId='" + key + "';";
-                execQuery(db, qstring, afterDelete, errorHandler);
-
+                //execQuery(db, qString, afterDelete, errorHandler);
+                db.transaction(function(tx) {
+                    var resultsHandler = function (tx) {
+                        callback(key);
+                    };
+                    var errorHandler = function (error) {
+                        throw (error);
+                        //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
+                    };
+                    tx.executeSql(qString, [], resultsHandler, errorHandler);
+                });
             },
 
             all : function (callback) {
+                var qString = "SELECT * FROM OBJECTS;", db = this.dataBase;
 
-                function errorHandler(error) {
-                    throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
-                }
+                db.transaction(function(tx) {
+                    var resultsHandler = function (tx, recs) {
+                        var results = [], obj = {}, i, row;
 
-                this.dataBase.transaction(
-                    function (transaction) {
-
-                        transaction.executeSql(
-                            "SELECT * FROM OBJECTS;",
-                            [],
-                            function (transaction, dataSet) {
-                                var results = [], obj = {}, i, row;
-
-                                for (i = 0; i < dataSet.rows.length; i += 1) {
-                                    row = dataSet.rows.item(i);
-                                    //obj = JSON.parse(row['SerializedObject']);
-                                    obj = JSON.parse(row.SerializedObject);
-                                    results.push(obj);
-                                }
-                                //if (obj) {obj.key = key; callback(obj); } else { callback(null); }
-                                callback(results);
-
-                            },
-                            errorHandler
-                        );
-                    }
-                );
-
+                        //for (i = 0; i < recs.rows.length; i += 1) {
+                        for(i = recs.rows.length; i--;) {
+                            row = recs.rows.item(i);
+                            //obj = JSON.parse(row['SerializedObject']);
+                            obj = JSON.parse(row.SerializedObject);
+                            results.push(obj);
+                        }
+                        //if (obj) {obj.key = key; callback(obj); } else { callback(null); }
+                        callback(results);
+                    };
+                    var errorHandler = function (error) {
+                        throw (error);
+                        //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
+                    };
+                    tx.executeSql(qString, [], resultsHandler, errorHandler);
+                });
             },
 
             drop : function (callback) {
@@ -211,7 +205,8 @@ var artemia = (function (cyste) {
                 }
 
                 function errorHandler(error) {
-                    throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
+                    throw (error);
+                    //throw ('WARNING.  [' + error.message + '] [' + error.code + ']');
                 }
                 qstring = "DROP TABLE OBJECTS;";
                 execQuery(db, qstring, afterDrop, errorHandler);
