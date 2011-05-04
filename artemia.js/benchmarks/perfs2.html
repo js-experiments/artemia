@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <script src = "tmp/Lawnchair.js"> </script>
+    <script src = "tmp/LawnchairAdaptorHelpers.js"> </script>
+    <script src = "tmp/WebkitSQLiteAdaptor.js"> </script>
+
+    <script src = "../js/artemia.js"> </script>
+    <script src = "../js/plugins/artemia.sqlite.storage.js"> </script>
+    <script src = "benchmark.js"> </script>
+</head>
+<body>
+
+</body>
+
+<script>
+    var suite = new Benchmark.Suite;
+
+    var lawnChairStore = new Lawnchair({
+        adaptor: 'webkit',
+        table: 'lawnchair_sqlite'
+    }, function() {});
+    
+    var artemiaStore = artemia.getStore({
+        type: 'sqlite',
+        base: 'artemia_sqlite'
+    });
+
+    artemiaStore.nuke(function(){});
+    lawnChairStore.nuke();
+
+    // add tests
+    suite
+    .add('Save_Update#LawnChair',function() {
+        var doc1 = { key: "001", title: "hello", text: "this a doc" };
+        lawnChairStore.save(doc1,function(r){});
+    })
+    .add('Save_Update#Artemia',function() {
+        var doc1 = { key: "001", title: "hello", text: "this a doc" };
+        artemiaStore.save(doc1,function(r){});
+    })
+    // add listeners
+    // add listeners
+    .on('cycle', function(bench) {
+      console.log(String(bench));
+      document.write(String(bench)+"<hr>")
+    })
+    .on('complete', function() {
+      console.log('Fastest is ' + this.filter('fastest').pluck('name'));
+      document.write('Fastest is ' + this.filter('fastest').pluck('name')+"<hr>")
+    })
+    // run async : true as parameter
+    .run();
+
+</script>
+
+</html>
