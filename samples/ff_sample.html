@@ -3,15 +3,18 @@
 <html>
 <head>
     <title></title>
-    <script type="text/javascript" src="../js/artemia.js"></script>
-    <script type="text/javascript" src="../js/plugins/artemia.html5_global.storage.js"></script>
+    <script type="text/javascript" src="../../js/artemia.js"></script>
+    <script type="text/javascript" src="../../js/plugins/artemia.html5_global.storage.js"></script>
 </head>
 <body>
 
 </body>
 
 <script>
-    var ls = artemia.getStore({type:'local',base:'myfirstbase'});
+
+    /*open with http*/
+
+    var ls = artemia.getStore({type:'global',base:'myfirstbase'});
     var doc1 = {
         /*key:"key000",*/
         title:"Hello",
@@ -87,8 +90,6 @@
     };
 
     ls.query(mapFunction,function(r){
-        console.log(r);
-        console.log(typeof r);
         for(var m in r){
             document.write("   - "+r[m].key+" "+r[m].title+" "+r[m].text+"<BR>");
         }
