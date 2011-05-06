@@ -3,8 +3,13 @@
 <html>
 <head>
     <title></title>
+    <!--
     <script type="text/javascript" src="../js/artemia.js"></script>
     <script type="text/javascript" src="../js/adaptors.plugins/artemia.sqlite.storage.js"></script>
+    -->
+
+    <script src="../js/minified/artemia.min.js"></script>
+    <script src="../js/minified/artemia.sqlite.storage.min.js"></script>
 </head>
 <body>
 
@@ -46,6 +51,20 @@
             });
 
         });
+
+        document.write("I want the total of prices of all documents :<BR>");
+
+        var sumFunction = function(doc){
+            return doc.price;
+        }
+
+        ls.query(sumFunction,function(r){
+            console.log("SUM : ", artemia.sum(r));
+            console.log("PRODUCT : ", artemia.product(r));
+            console.log("MIN : ", artemia.min(r));
+            console.log("MAX : ", artemia.max(r));
+        })
+
 
 
     });

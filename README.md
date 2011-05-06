@@ -17,7 +17,7 @@ It's very very (and very) inspired by Lawnchair (he copy many aspects, normal, i
 but has some specific features :
 
 - plug-in mode with module pattern
-- **Only for local, session, global (and userdata) storages ** :some reduce function with `query()` method : `sum()`, `product()`, `min()`, `max()`
+- **Only for local, session, global (and userdata) storages** :some reduce function with `query()` method : `sum()`, `product()`, `min()`, `max()`
 
 ##How to ?
 
@@ -161,11 +161,83 @@ If you want to work with sqlite storage :
 
 ~~~
 
+###But ... If you want to do the same thing with sqlite storage :
+
+You can do that (less pretty i know) :
+
+~~~ js
+    myStore.query(sumFunction,function(r){
+        console.log("SUM : ", artemia.sum(r));
+        console.log("PRODUCT : ", artemia.product(r));
+        console.log("MIN : ", artemia.min(r));
+        console.log("MAX : ", artemia.max(r));
+    })
+~~~
 
 ##Create an adaptor
 
+Imagine you want to create a CoucDb adaptor you can call like this : `var couchDb = artemia.getStore({type : 'couchdb', base : 'mybase'});`
+
+you have just to create a new js file like this
+
+~~~ js
+var artemia = (function (cyste) {
+
+    function getKindOfStore(baseName,storeType){
+
+        return {
+            storeType:storeType,
+            storeName:baseName,
+            isAvailable:function(){},
+            get:function(){},
+            remove:function(){},
+            save:function(){},
+            all:function(){},
+            drop:function(){}
+        };
+    };
+
+    /*the _UPPER_ is a convention*/
+    cyste.get_COUCHDB_store = function(baseName,storeType){
+        var store=getKindOfStore(baseName,storeType);
+        if(!store.isAvailable()){store=null;}
+        return store;
+    };
+
+    return cyste;
+}(artemia));
+~~~
+
+**Remark** : if type = "couchdb" you have to cretae a function named `cyste.get_COUCHDB_store` with "couchdb" **capitalized**, if type = "johndoe" : `cyste.get_JOHNDOE_store`, etc. ...
+
+it's a convention (and type is always in lowercase), it allows you add plug-in without modify core artemia.js
+
 ##Add a functionality
+
+Just do this (in an other js file) :
+
+~~~ js
+    var artemia = (function (cyste) {
+
+        cyste.myFunction = function() { return null; }
+
+        return cyste;
+    }(artemia));
+~~~
+
+##Minified versions
+
+You can find :
+
+- artemia.min.js (Compiled Size : 1.38KB)
+- artemia.storage.min.js (Compiled Size : 1.14KB)
+- artemia.sqlite.storage.min.js (Compiled Size : 2.03KB)
+
+- artemia.pkg.lite.min.js = artemia + artemia.storage (Compiled Size : 2.52KB)
+- artemia.pkg.min.js = artemia + artemia.storage + artemia.sqlite.storage (Compiled Size : 4.55KB)
 
 ##TO DO
 
-Write real samples, mine are very creepy
+- Write real samples, mine are very creepy
+- Improve my english (creepy too)
+- a CouchDb adaptor ?

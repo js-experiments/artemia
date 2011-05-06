@@ -14,15 +14,13 @@ var artemia = (function (cyste) {
             remove:function(){},
             save:function(){},
             all:function(){},
-            drop:function(){},
-            query:function(){}
+            drop:function(){}
         };
     };
 
     /*the _UPPER_ is a convention*/
     cyste.get_KINDOF_store = function(baseName,storeType){
         var store=getKindOfStore(baseName,storeType);
-        cyste.interfaceIsImplemented(store);
         if(!store.isAvailable()){store=null;}
         return store;
     };
