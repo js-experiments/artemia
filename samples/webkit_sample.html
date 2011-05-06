@@ -4,7 +4,8 @@
 <head>
     <title></title>
     <script type="text/javascript" src="../js/artemia.js"></script>
-    <script type="text/javascript" src="../js/plugins/artemia.html5_global.storage.js"></script>
+    <script type="text/javascript" src="../js/adaptors.plugins/artemia.storage.js"></script>
+
 </head>
 <body>
 
@@ -12,11 +13,14 @@
 
 <script>
     var ls = artemia.getStore({type:'local',base:'myfirstbase'});
+
+    ls.drop(function(){});
+
     var doc1 = {
         /*key:"key000",*/
         title:"Hello",
         text:"this the doc one",
-        price:20
+        price:5
     }
 
     var doc2 = {
@@ -31,21 +35,21 @@
         key:"key002",
         title:"Hello",
         text:"this the doc three",
-        price:34
+        price:5
     }
 
     var doc4 = {
         key:"key003",
         title:"Salut",
         text:"this the doc four",
-        price:180
+        price:5
     }
 
      var doc5 = {
         key:"key004",
         title:"Salut",
         text:"this the doc five",
-        price:45
+        price:5
     }
 
     ls.save(doc1,function(r){document.write("doc1 is saved<BR>");});
@@ -104,12 +108,15 @@
 
     ls.query(sumFunction,function(r){}).sum(function(r){document.write("SUM = "+r+"<BR>");});
 
-    document.write("SUM AGAIN = "+ls.query(sumFunction).sum());
+    document.write("SUM AGAIN = "+ls.query(sumFunction,function(r){}).sum());
 
     document.write("<HR>");
     document.write("MIN = "+ls.query(sumFunction).min());
     document.write("<HR>");
     document.write("MIN = "+ls.query(sumFunction).max());
+
+    document.write("<HR>");
+    document.write("PRODUCT = "+ls.query(sumFunction).product());
 
 </script>
 </html>

@@ -6,16 +6,9 @@
  * --=>>>|:<
  */
 
-/* 04/30/11
-    jslint
-        white: true, onevar: true, browser: true,
-        undef: true, nomen: true, regexp: true, plusplus: true,
-        bitwise: true, newcap: true, maxerr: 50, indent: 4
-*/
-
 var artemia = (function (cyste) {
 
-    function getHtml5OrGlobalStore(kindOfStore, StoreName, storeType) {
+    function getLocalStore(kindOfStore, StoreName, storeType) {
         return {
             storeType : storeType,
             storeName : StoreName,
@@ -39,7 +32,7 @@ var artemia = (function (cyste) {
                 var key = this.storeName + '|' + (typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key);
                 /*TODO: have to verify if exists before delete*/
                 kindOfStore.removeItem(key);
-                callback(key);
+                if (callback) { callback(key); }
             },
 
             save : function (obj, callback) {
@@ -70,50 +63,16 @@ var artemia = (function (cyste) {
 
             drop : function (callback) {
                 var that = this;
-                function something() {}
+
                 this.all(function (r) {
                     var m;
                     for (m in r) {
                         if (r.hasOwnProperty(m)) {
-                            that.remove(r[m].key, something());
+                            that.remove(r[m].key, null);
                         }
                     }
                 });
-                callback();
-            },
-
-            query : function (map, callback) {
-                var results = [], res;
-                this.all(function (r) {
-                    var m;
-                    for (m in r) {
-                        if (r.hasOwnProperty(m)) {
-                            res = map(r[m]);
-                            if (res) { results.push(res); }
-                        }
-
-                    }
-                });
-                if (callback) { callback(results); }
-
-                return {
-                    sum : function (callback) {
-                        res = cyste.sum(results);
-                        if (callback) { callback(res); }
-                        return res;
-                    },
-                    min : function (callback) {
-                        res = cyste.min(results);
-                        if (callback) { callback(res); }
-                        return res;
-                    },
-                    max : function (callback) {
-                        res = cyste.max(results);
-                        if (callback) { callback(res); }
-                        return res;
-                    }
-                };
-
+                if (callback) { callback(); }
             }
 
         };
@@ -128,16 +87,14 @@ var artemia = (function (cyste) {
 
     /*the _UPPER_ is a convention*/
     cyste.get_SESSION_store = function (baseName, storeType) {
-        var store = getHtml5OrGlobalStore(window.sessionStorage, baseName, storeType);
-        cyste.interfaceIsImplemented(store);
+        var store = getLocalStore(window.sessionStorage, baseName, storeType);
         if (!store.isAvailable()) { store = null; }
         return store;
     };
 
     /*the _UPPER_ is a convention*/
     cyste.get_LOCAL_store = function (baseName, storeType) {
-        var store = getHtml5OrGlobalStore(window.localStorage, baseName, storeType);
-        cyste.interfaceIsImplemented(store);
+        var store = getLocalStore(window.localStorage, baseName, storeType);
         if (!store.isAvailable()) { store = null; }
         return store;
     };
@@ -154,14 +111,18 @@ var artemia = (function (cyste) {
 
         Error: uncaught exception:
         [Exception... "Security error"  code: "1000" nsresult: "0x805303e8 (NS_ERROR_DOM_SECURITY_ERR)"
-        location: "file:///Users/k33g_org/Dropbox/projects/artemia/js/plugins/artemia.GlobalStorage.js Line: 12"]
+        location: "file:///Users/k33g_org/Dropbox/projects/artemia/js/adaptors.plugins/artemia.GlobalStorage.js Line: 12"]
+
+        see :
+        http://ejohn.org/blog/dom-storage-answers/
+        http://ejohn.org/blog/dom-storage/
 
     */
 
     /*the _UPPER_ is a convention*/
-    cyste.get_GLOBAL_store = function (baseName, storeType) {
-        var store = getHtml5OrGlobalStore(window.globalStorage[window.location.hostname], baseName, storeType);
-        cyste.interfaceIsImplemented(store);
+    cyste.get_GLOBAL_store = function (baseName, storeType, domain) {
+        //var store = getLocalStore(window.globalStorage[window.location.hostname], baseName, storeType);
+        var store = getLocalStore(window.globalStorage[domain], baseName, storeType);
         if (!store.isAvailable()) { store = null; }
         return store;
     };

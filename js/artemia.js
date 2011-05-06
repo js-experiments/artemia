@@ -6,15 +6,6 @@
  * --=>>>|:<
  */
 
-
-/*  04/30/11
-    jslint
-        white: true, onevar: true, undef: true, nomen: true,
-        regexp: true, plusplus: true, bitwise: false, newcap: true,
-        maxerr: 50, indent: 4
-*/
-
-
 var artemia = (function () {
 
     var cyste = {};
@@ -27,8 +18,8 @@ var artemia = (function () {
         remove : function () {},
         save : function () {},
         all : function () {},
-        drop : function () {},
-        query : function () {}
+        drop : function () {}
+        //query : function () {}
     };
 
     cyste.interfaceIsImplemented = function (store) {
@@ -45,8 +36,6 @@ var artemia = (function () {
             }
         }
     };
-
-
 
     /*===========================================
         HTML5 Storage :
@@ -66,7 +55,52 @@ var artemia = (function () {
 
     cyste.getStore = function (params) {
         /*{type:'local',base:'myfirstbase'}*/
-        return cyste['get_' + params.type.toUpperCase() + '_store'](params.base, params.type);
+        var store = cyste['get_' + params.type.toUpperCase() + '_store'](params.base, params.type, params.domain);
+        cyste.interfaceIsImplemented(store);
+
+        store.query = function (map, callback) {
+            var results = [], res;
+            this.all(function (r) {
+                var m;
+                for (m in r) {
+                    if (r.hasOwnProperty(m)) {
+                        res = map(r[m]);
+                        if (res) { results.push(res); }
+                    }
+                }
+                if (callback) { callback(results); }
+            });
+            //if (callback) { callback(results); }
+            if (params.type != "sqlite"){
+                return {
+                    sum : function (callback) {
+                        res = cyste.sum(results);
+                        if (callback) { callback(res); }
+                        return res;
+                    },
+                    min : function (callback) {
+                        res = cyste.min(results);
+                        if (callback) { callback(res); }
+                        return res;
+                    },
+                    max : function (callback) {
+                        res = cyste.max(results);
+                        if (callback) { callback(res); }
+                        return res;
+                    }
+                    ,
+                    product : function (callback) {
+                        res = cyste.product(results);
+                        if (callback) { callback(res); }
+                        return res;
+                    }
+                };
+            }else{
+                return null;
+            }
+
+        }
+        return store;
     };
 
     cyste.allDbs = function () {
@@ -85,6 +119,16 @@ var artemia = (function () {
         for (m in values) {
             if (values.hasOwnProperty(m)) {
                 total += values[m];
+            }
+        }
+        return total;
+    };
+
+    cyste.product = function (values) {
+        var m, total = 1;
+        for (m in values) {
+            if (values.hasOwnProperty(m)) {
+                total = total * values[m];
             }
         }
         return total;

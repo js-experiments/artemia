@@ -4,7 +4,7 @@
 <head>
     <title></title>
     <script type="text/javascript" src="../js/artemia.js"></script>
-    <script type="text/javascript" src="../js/plugins/artemia.sqlite.storage.js"></script>
+    <script type="text/javascript" src="../js/adaptors.plugins/artemia.sqlite.storage.js"></script>
 </head>
 <body>
 
@@ -16,6 +16,7 @@
     ls.all(function(r){
         for(var m in r){
             document.write("   - "+r[m].key+" "+r[m].title+" "+r[m].text+"<BR>");
+            console.log("   - "+r[m].key+" "+r[m].title+" "+r[m].text+"<BR>");
 
             //ls.remove(r[m].key,function(r){console.log(r);})
         }
@@ -47,11 +48,9 @@
         });
 
 
-
-
-
-
     });
+
+
 
 
 

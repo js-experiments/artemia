@@ -4,7 +4,8 @@
 <head>
     <title></title>
     <script type="text/javascript" src="../js/artemia.js"></script>
-    <script type="text/javascript" src="../js/plugins/artemia.html5_global.storage.js"></script>
+    <script type="text/javascript" src="../js/adaptors.plugins/artemia.storage.js"></script>
+
 </head>
 <body>
 
@@ -14,7 +15,9 @@
 
     /*open with http*/
 
-    var ls = artemia.getStore({type:'global',base:'myfirstbase'});
+    var ls = artemia.getStore({
+        type:'global',base:'myfirstbase', domain:window.location.hostname});
+    ls.drop(function(){});
     var doc1 = {
         /*key:"key000",*/
         title:"Hello",
@@ -111,6 +114,9 @@
     document.write("MIN = "+ls.query(sumFunction).min());
     document.write("<HR>");
     document.write("MIN = "+ls.query(sumFunction).max());
+
+    document.write("<HR>");
+    document.write("PRODUCT = "+ls.query(sumFunction).product());    
 
 </script>
 </html>

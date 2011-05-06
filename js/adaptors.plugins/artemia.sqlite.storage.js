@@ -5,26 +5,6 @@
  * --=>>>|:<
  */
 
-/* 05/01/11
-    jslint
-        white: true, onevar: true, browser: true, undef: true,
-        nomen: true, regexp: true, plusplus: true, bitwise: true,
-        newcap: true, maxerr: 50, indent: 4
-
-        Error:
-        Problem at line 128 character 57: Unexpected '--'.
-
-        for (i = recs.rows.length; i--;) {
-
-        => but it is faster
-
-        Unused variable: tx 98 "resultsHandler", tx 115 "resultsHandler", tx 126 "resultsHandler", callback 153 "drop"
-
-        => tx (transaction is mandatory)
-        => callback with drop : TODO
-
-*/
-
 var artemia = (function (cyste) {
 
     function getSqLiteStore(storeName, storeType) {
@@ -73,9 +53,10 @@ var artemia = (function (cyste) {
 
                 insert = function (obj, callback) {
                     that.dataBase.transaction(function (tx) {
+                        if (!obj.key) { obj.key = cyste.guidGenerator(); }
                         tx.executeSql(
                             "INSERT INTO " + that.storeName + " (UniqueId, SerializedObject) VALUES (?, ?);",
-                            [obj.key || cyste.guidGenerator(), JSON.stringify(obj)],
+                            [obj.key, JSON.stringify(obj)],
                             callback(obj),
                             null
                         );
@@ -160,43 +141,14 @@ var artemia = (function (cyste) {
             },
 
             drop : function (callback) {
-                /* TODO: DROP ... */
-            },
-
-
-            query : function (map, callback) {
-                var results = [], res;
-                this.all(function (r) {
-                    var m;
-                    for (m in r) {
-                        if (r.hasOwnProperty(m)) {
-                            res = map(r[m]);
-                            if (res) { results.push(res); }
-                        }
-
-                    }
-                    callback(results);
+                var that = this;
+                that.dataBase.transaction(function (tx) {
+                    var qString = "DROP TABLE " + that.storeName + ";",
+                        resultsHandler = function () {
+                            callback();
+                        };
+                    tx.executeSql(qString, [], resultsHandler, function () {});
                 });
-                //if (callback) { callback(results); }
-
-                return {
-                    sum : function (callback) {
-                        res = cyste.sum(results);
-                        if (callback) { callback(res); }
-                        return res;
-                    },
-                    min : function (callback) {
-                        res = cyste.min(results);
-                        if (callback) { callback(res); }
-                        return res;
-                    },
-                    max : function (callback) {
-                        res = cyste.max(results);
-                        if (callback) { callback(res); }
-                        return res;
-                    }
-                };
-
             }
 
         };
@@ -211,7 +163,6 @@ var artemia = (function (cyste) {
     /*the _UPPER_ is a convention*/
     cyste.get_SQLITE_store = function (baseName, storeType) {
         var store = getSqLiteStore(baseName, storeType);
-        cyste.interfaceIsImplemented(store);
         if (!store.isAvailable()) { store = null; }
         return store;
     };

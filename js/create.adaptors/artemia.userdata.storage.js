@@ -108,40 +108,8 @@ var artemia = (function (cyste) {
                     }
                 });
                 callback();
-            },
-
-            query : function (map, callback) {
-                var results = [], res;
-                this.all(function (r) {
-                    var m;
-                    for (m in r) {
-                        if (r.hasOwnProperty(m)) {
-                            res = map(r[m]);
-                            if (res) { results.push(res); }
-                        }
-                    }
-                });
-                if (callback) { callback(results); }
-
-                return {
-                    sum : function (callback) {
-                        res = cyste.sum(results);
-                        if (callback) { callback(res); }
-                        return res;
-                    },
-                    min : function (callback) {
-                        res = cyste.min(results);
-                        if (callback) { callback(res); }
-                        return res;
-                    },
-                    max : function (callback) {
-                        res = cyste.max(results);
-                        if (callback) { callback(res); }
-                        return res;
-                    }
-                };
-
             }
+
         };
     }
 
