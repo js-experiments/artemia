@@ -26,15 +26,15 @@ but has some specific features :
 If you want to work with local storage, or/and session storage, or/and global storage :
 
 ~~~ html
-    <script type="text/javascript" src="../js/artemia.js"></script>
-    <script type="text/javascript" src="../js/adaptors.plugins/artemia.storage.js"></script>
+    <script src="../js/artemia.js"></script>
+    <script src="../js/adaptors.plugins/artemia.storage.js"></script>
 ~~~
 
 If you want to work with sqlite storage :
 
 ~~~ html
-    <script type="text/javascript" src="../js/artemia.js"></script>
-    <script type="text/javascript" src="../js/adaptors.plugins/artemia.sqlite.js"></script>
+    <script src="../js/artemia.js"></script>
+    <script src="../js/adaptors.plugins/artemia.sqlite.js"></script>
 ~~~
 
 ###Init
