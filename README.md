@@ -183,7 +183,7 @@ you have just to create a new js file like this
 ~~~ js
 var artemia = (function (cyste) {
 
-    function getKindOfStore(baseName,storeType){
+    function getCouchDBStore(baseName,storeType){
 
         return {
             storeType:storeType,
@@ -199,7 +199,7 @@ var artemia = (function (cyste) {
 
     /*the _UPPER_ is a convention*/
     cyste.get_COUCHDB_store = function(baseName,storeType){
-        var store=getKindOfStore(baseName,storeType);
+        var store = getCouchDBStore(baseName,storeType);
         if(!store.isAvailable()){store=null;}
         return store;
     };
@@ -210,7 +210,22 @@ var artemia = (function (cyste) {
 
 **Remark** : if type = "couchdb" you have to cretae a function named `cyste.get_COUCHDB_store` with "couchdb" **capitalized**, if type = "johndoe" : `cyste.get_JOHNDOE_store`, etc. ...
 
-it's a convention (and type is always in lowercase), it allows you add plug-in without modify core artemia.js
+it's a convention (and type is always in lowercase), it allows you add plug-in **without** modify core artemia.js.
+
+**Be careful** : it is mandatory to implement this :
+
+~~~ js
+    cyste.Interface = {
+        storeType : '',
+        storeName : '',
+        isAvailable : function () {},
+        get : function () {},
+        remove : function () {},
+        save : function () {},
+        all : function () {},
+        drop : function () {}
+    };
+~~~
 
 ##Add a functionality
 
