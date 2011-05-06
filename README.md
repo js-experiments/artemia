@@ -188,6 +188,7 @@ var artemia = (function (cyste) {
         return {
             storeType:storeType,
             storeName:baseName,
+            useReduce : true, /* ie : is false for sqlite adaptor */
             isAvailable:function(){},
             get:function(){},
             remove:function(){},
@@ -218,6 +219,7 @@ it's a convention (and type is always in lowercase), it allows you add plug-in *
     cyste.Interface = {
         storeType : '',
         storeName : '',
+        useReduce : true,
         isAvailable : function () {},
         get : function () {},
         remove : function () {},
@@ -244,12 +246,12 @@ Just do this (in an other js file) :
 
 You can find :
 
-- artemia.min.js (Compiled Size : 1.38KB)
-- artemia.storage.min.js (Compiled Size : 1.14KB)
-- artemia.sqlite.storage.min.js (Compiled Size : 2.03KB)
+- artemia.min.js (Compiled Size : 1.40KB)
+- artemia.storage.min.js (Compiled Size : 1.16KB)
+- artemia.sqlite.storage.min.js (Compiled Size : 2.04KB)
 
-- artemia.pkg.lite.min.js = artemia + artemia.storage (Compiled Size : 2.52KB)
-- artemia.pkg.min.js = artemia + artemia.storage + artemia.sqlite.storage (Compiled Size : 4.55KB)
+- artemia.pkg.lite.min.js = artemia + artemia.storage (Compiled Size : 2.55KB)
+- artemia.pkg.min.js = artemia + artemia.storage + artemia.sqlite.storage (Compiled Size : 4.59KB)
 
 ##TO DO
 

@@ -13,20 +13,20 @@ var artemia = (function () {
     cyste.Interface = {
         storeType : '',
         storeName : '',
+        useReduce : false,
         isAvailable : function () {},
         get : function () {},
         remove : function () {},
         save : function () {},
         all : function () {},
         drop : function () {}
-        //query : function () {}
     };
 
     cyste.interfaceIsImplemented = function (store) {
         var m;
         for (m in cyste.Interface) {
             if (cyste.Interface.hasOwnProperty(m)) {
-                if (store[m]) {
+                if (store[m]!=null) {
                     if (typeof cyste.Interface[m] !== typeof store[m]) {
                         throw ("artemia : " + store.storeType + " Storage : '" + m + "' (" + typeof store[m] + ")" + " : bad type");
                     }
@@ -71,7 +71,7 @@ var artemia = (function () {
                 if (callback) { callback(results); }
             });
             //if (callback) { callback(results); }
-            if (params.type != "sqlite"){
+            if (this.useReduce) {
                 return {
                     sum : function (callback) {
                         res = cyste.sum(results);

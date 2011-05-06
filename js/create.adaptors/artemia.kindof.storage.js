@@ -7,14 +7,15 @@ var artemia = (function (cyste) {
     function getKindOfStore(baseName,storeType){
 
         return {
-            storeType:storeType,
-            storeName:baseName,
-            isAvailable:function(){},
-            get:function(){},
-            remove:function(){},
-            save:function(){},
-            all:function(){},
-            drop:function(){}
+            storeType : storeType,
+            storeName : baseName,
+            useReduce : true,
+            isAvailable : function(){},
+            get : function(){},
+            remove : function(){},
+            save : function(){},
+            all : function(){},
+            drop : function(){}
         };
     };
 

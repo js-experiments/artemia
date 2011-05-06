@@ -40,6 +40,7 @@ var artemia = (function (cyste) {
         return {
             storeType : storeType,
             storeName : storeName,
+            useReduce : true,
             isAvailable : function () {
                 try {
                     getStorageEl().load(this.storeName);
