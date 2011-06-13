@@ -100,7 +100,7 @@ var artemia = (function (cyste) {
             remove : function (keyOrObject, callback) {
                 var that = this;
                 /*TODO: have to verify if exists before delete*/
-                that.database.transaction(function (tx) {
+                that.dataBase.transaction(function (tx) {
                     var qString = "DELETE FROM " + that.storeName + " WHERE UniqueId= ?;",
                         key = typeof keyOrObject === 'string' ? keyOrObject : keyOrObject.key,
                         resultsHandler = function (tx) {
