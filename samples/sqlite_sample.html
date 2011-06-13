@@ -76,7 +76,7 @@
                             document.write("<HR>");
                         });
 
-
+                        ls.remove("key004", function(r){ console.log(r);})
 
                         ls.get('key001',function(r){
                             document.write(r.key+" " + r.title+" "+r.text+" has been found");

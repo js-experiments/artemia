@@ -106,7 +106,7 @@ var artemia = (function (cyste) {
                         resultsHandler = function (tx) {
                             callback(key);
                         };
-                    tx.executeSql(qString, key, resultsHandler, function () {});
+                    tx.executeSql(qString, [key], resultsHandler, function () {});
                 });
             },
 
